@@ -5426,6 +5426,10 @@ app.get('/', (req, res) => {
         ctx.strokeStyle = mSGridColor;
         ctx.lineWidth = 2;
 
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0,0,mWidth,mHeight);
+        ctx.fillStyle = "#000000";
+
         for (let index = 0; index < vSNum + 1; index++) {
         	ctx.beginPath();
             ctx.moveTo(index * mSGridWidth, 0);
