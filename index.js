@@ -1,6 +1,7 @@
 //import express
 const express = require("express");
 const parse = require('parse-color');
+const jimp = require('jimp');
 
 const { createCanvas, loadImage } = require('canvas')
 
@@ -5388,7 +5389,7 @@ app.get('/', (req, res) => {
     var density = 1.5;
 
     // text
-    ctx.textBaseline = "top";
+    ctx.textBaseline = "bottom";
     
 
     // Write "Awesome!"
@@ -5416,42 +5417,40 @@ app.get('/', (req, res) => {
     }
 
     function initBackground() {
-        ctx.beginPath();
         mSGridWidth = (10 * MULTIPLE);
         mGridWidth = 5 * mSGridWidth;
-        // ctx.fillStyle = "#FFFFFF";
-        // ctx.fillRect(0,0,4050,2400);
 
         var vSNum = parseInt((mWidth / mSGridWidth));
         var hSNum = parseInt((mHeight / mSGridWidth));
-        
+
         ctx.strokeStyle = mSGridColor;
-        ctx.lineWidth = 2/lineScale;
+        ctx.lineWidth = 2;
 
         for (let index = 0; index < vSNum + 1; index++) {
+        	ctx.beginPath();
             ctx.moveTo(index * mSGridWidth, 0);
             ctx.lineTo(index * mSGridWidth, mHeight);
             ctx.stroke();
+            ctx.closePath();
         }
 
         for (let index = 0; index < hSNum + 1; index++) {
+        	ctx.beginPath();
             ctx.moveTo(0, index * mSGridWidth);
             ctx.lineTo(mWidth, index * mSGridWidth);
             ctx.stroke();
+            ctx.closePath();
         }
-
-        ctx.closePath();
         
         var vNum = parseInt(mWidth / mGridWidth);
         var hNum = parseInt(mHeight / mGridWidth);
 
-        ctx.beginPath();
-
         ctx.strokeStyle = mGridColor;
-        ctx.lineWidth = 3/lineScale;
+        ctx.lineWidth = 2;
 
         for (let index = 0; index < hNum + 1; index++) {
-            if (index == 0 || index == hNum) {
+        	ctx.beginPath();
+            if (index === 0 || index === hNum) {
                 ctx.strokeStyle = mInitColor;
             } else {
                 ctx.strokeStyle = mGridColor;
@@ -5459,15 +5458,13 @@ app.get('/', (req, res) => {
             ctx.moveTo(0, index * mGridWidth);
             ctx.lineTo(mWidth, index * mGridWidth);
             ctx.stroke();
+            ctx.closePath();
         }
 
-        ctx.closePath();
-
-        ctx.beginPath();
-
         for (let index = 0; index < vNum + 1; index++) {
-            ctx.lineWidth = 3/lineScale;
-            if (index == 0 || index == vNum) {
+        	ctx.beginPath();
+            ctx.lineWidth = 2;
+            if (index === 0 || index === vNum) {
                 ctx.strokeStyle = mInitColor;
             } else {
                 ctx.strokeStyle = mGridColor;
@@ -5475,6 +5472,8 @@ app.get('/', (req, res) => {
             ctx.moveTo(index * mGridWidth, 0);
             ctx.lineTo(index * mGridWidth, mHeight);
             ctx.stroke();
+            ctx.closePath();
+            ctx.beginPath();
             if ((index - 2) % 5 == 0) {
                 ctx.strokeStyle = mSecLineColor;
                 ctx.moveTo(index * mGridWidth, 2 * mGridWidth);
@@ -5484,14 +5483,12 @@ app.get('/', (req, res) => {
                 // ctx.font = (10 * density) + "px Arial";
                 ctx.fillText((index - 2) / 5 + "s", index * mGridWidth + 0.5 * mSGridWidth, mHeight - 2 * mGridWidth);
             }
+            ctx.closePath();
         }
 
-        ctx.closePath();
-
         ctx.beginPath();
-
         ctx.strokeStyle = mInitColor;
-        ctx.lineWidth = 3/lineScale;
+        ctx.lineWidth = 2;
         ctx.moveTo(0, 4 * mGridWidth);
         ctx.lineTo(2 * mSGridWidth, 4 * mGridWidth);
         ctx.lineTo(2 * mSGridWidth, 2 * mGridWidth);
@@ -5499,7 +5496,6 @@ app.get('/', (req, res) => {
         ctx.lineTo(2 * mSGridWidth + mGridWidth, 4 * mGridWidth);
         ctx.lineTo(4 * mSGridWidth + mGridWidth, 4 * mGridWidth);
         ctx.stroke();
-
         ctx.closePath();
 
         // ctx.font = (12 * density) + "px Arial";
@@ -5512,15 +5508,14 @@ app.get('/', (req, res) => {
             2 * mGridWidth, mGridWidth
         );
 
-        ctx.beginPath();
-
         ctx.strokeStyle = mLineColor;
-        ctx.lineWidth = (1.25 * density)/lineScale;
+        ctx.lineWidth = (1.25 * density);
 
         var startX = 0;
         var startY = 2 * mGridWidth;
 
         for (let index = 0; index < pList.length; index++) {
+        	ctx.beginPath();
             switch (index) {
                 case parseInt(2500 / 3):
                 case parseInt(2500 * 2 / 3):
@@ -5540,10 +5535,8 @@ app.get('/', (req, res) => {
                     ctx.stroke();
                     break;
             }
+            ctx.closePath();
         }
-
-        ctx.closePath();
-
     }
 
     // Draw cat with lime helmet
@@ -5557,6 +5550,9 @@ app.get('/', (req, res) => {
     setDatas(pListTest, "Tyo", "Male", "24", "80", "120/80");
     // setDatas(pList, "Tyo", "Male", "24", "80", "120/80");
     initBackground();
+
+    // buffer
+    // var im = canvas.toBuffer();
 
     res.send('<img src="' + canvas.toDataURL() + '" />');
 
