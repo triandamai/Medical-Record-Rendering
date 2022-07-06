@@ -1,7 +1,6 @@
 //import express
 const express = require("express");
 const parse = require('parse-color');
-const jimp = require('jimp');
 
 const { createCanvas, loadImage } = require('canvas')
 
@@ -10,22 +9,17 @@ const app = express();
 
 // basic route
 app.get('/', (req, res) => {
-    var mWidth = 1350;
-    var mHeight = 750;
-    // var mWidth = 4050;
-    // var mHeight = 2400;
-    const canvas = createCanvas(mWidth, mHeight)
-    const ctx = canvas.getContext('2d')
 
-    var username = "";
-    var sex = "";
-    var age = "";
+    // user data
+    var username = null;
+    var sex = null;
+    var age = null;
     var hr = null;
     var bp = null;
 
-    // list data
-    var pList = [];
-    var pListTest = 
+    // lead data
+    var leadData = [];
+    var leadDataTest = 
     [
         0,
         0,
@@ -5369,8 +5363,6 @@ app.get('/', (req, res) => {
         -92
     ]
 
-    ctx.antialias = "default"
-
     // colors
     var mInitColor = "#000000";
     var mLineColor = "#FB3159";
@@ -5378,36 +5370,18 @@ app.get('/', (req, res) => {
     var mSGridColor = "#F0F0F0";
     var mSecLineColor = "#8C8C8C";
 
-    // grid
+    // grid 
+    var resolutionScale = 1.5; // 1 = 2700x1501
+    var density = resolutionScale * 2;
+    var gain = 10; // wave gain
     var mGridWidth;
     var mSGridWidth;
-    var lineScale = 11;
-
-    //
-    var state = 10; // gain
-    var MULTIPLE = 0.5;
-    var density = 1.5;
-
-    // text
-    ctx.textBaseline = "bottom";
     
-
-    // Write "Awesome!"
-    // ctx.font = '30px Impact'
-    // ctx.rotate(0.1)
-    // ctx.fillText('Awesome!', 50, 100)
-
-    // Draw line under text
-    // var text = ctx.measureText('Awesome!')
-    // ctx.strokeStyle = 'rgba(0,0,0,1)'
-    // ctx.lineTo(50, 102)
-    // ctx.lineTo(50 + text.width, 102)
-    // ctx.stroke()
-
+    // set data
     function setDatas(native_list, usernameArg, sexArg, ageArg, hrArg, bpArg) {
         if (native_list != null) {
-            pList = [];
-            pList.push(...native_list);
+            leadData = [];
+            leadData.push(...native_list);
             username = usernameArg;
             sex = sexArg;
             age = ageArg;
@@ -5416,8 +5390,36 @@ app.get('/', (req, res) => {
         }
     }
 
+    // set data
+    setDatas(leadDataTest, username, sex, age, hr, bp);
+
+    // timeout ms
+    const DEFAULT_TIMEOUT_MS = 2500;
+
+    // resolution
+    var mWidth = resolutionScale * 2700; // width
+    var temp = 0;
+    if (leadData.length * 3 % DEFAULT_TIMEOUT_MS == 0) {
+        temp = leadData.length * 3 / DEFAULT_TIMEOUT_MS;
+    } else {
+        temp = leadData.length * 3 / DEFAULT_TIMEOUT_MS + 1
+    }
+    temp = parseInt((temp + 1) * 200 * resolutionScale / 1.12)
+    var mHeight = temp; // height
+
+    // canvas
+    const canvas = createCanvas(mWidth, mHeight)
+    const ctx = canvas.getContext('2d')
+
+    // text
+    ctx.textBaseline = "bottom";
+
+    // anti-alias
+    ctx.antialias = "default"
+
+    // draw the background and wave
     function initBackground() {
-        mSGridWidth = (10 * MULTIPLE);
+        mSGridWidth = (10 * resolutionScale);
         mGridWidth = 5 * mSGridWidth;
 
         var vSNum = parseInt((mWidth / mSGridWidth));
@@ -5450,7 +5452,7 @@ app.get('/', (req, res) => {
         var hNum = parseInt(mHeight / mGridWidth);
 
         ctx.strokeStyle = mGridColor;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
 
         for (let index = 0; index < hNum + 1; index++) {
         	ctx.beginPath();
@@ -5467,7 +5469,7 @@ app.get('/', (req, res) => {
 
         for (let index = 0; index < vNum + 1; index++) {
         	ctx.beginPath();
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             if (index === 0 || index === vNum) {
                 ctx.strokeStyle = mInitColor;
             } else {
@@ -5484,7 +5486,7 @@ app.get('/', (req, res) => {
                 ctx.lineTo(index * mGridWidth, mHeight - 2 * mGridWidth);
                 ctx.stroke();
 
-                // ctx.font = (10 * density) + "px Arial";
+                ctx.font = (10 * density) + "px Arial";
                 ctx.fillText((index - 2) / 5 + "s", index * mGridWidth + 0.5 * mSGridWidth, mHeight - 2 * mGridWidth);
             }
             ctx.closePath();
@@ -5492,7 +5494,7 @@ app.get('/', (req, res) => {
 
         ctx.beginPath();
         ctx.strokeStyle = mInitColor;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.moveTo(0, 4 * mGridWidth);
         ctx.lineTo(2 * mSGridWidth, 4 * mGridWidth);
         ctx.lineTo(2 * mSGridWidth, 2 * mGridWidth);
@@ -5502,7 +5504,7 @@ app.get('/', (req, res) => {
         ctx.stroke();
         ctx.closePath();
 
-        // ctx.font = (12 * density) + "px Arial";
+        ctx.font = (12 * density) + "px Arial";
         ctx.fillText("Gain: 10mm/mv Walking speed: 25mm/s I lead", 2 * mGridWidth, mHeight - mGridWidth);
         ctx.fillText("username:" + username + "    "
             + "sex:" + sex + "    "
@@ -5518,7 +5520,7 @@ app.get('/', (req, res) => {
         var startX = 0;
         var startY = 2 * mGridWidth;
 
-        for (let index = 0; index < pList.length; index++) {
+        for (let index = 0; index < leadData.length; index++) {
         	ctx.beginPath();
             switch (index) {
                 case parseInt(2500 / 3):
@@ -5526,16 +5528,16 @@ app.get('/', (req, res) => {
                 case parseInt(2500 * 3 / 3):
                 case parseInt(2500 * 4 / 3):
                 case parseInt(2500 * 5 / 3):
-                    startX = (index - 1) * 3 * MULTIPLE;
+                    startX = (index - 1) * 3 * resolutionScale;
                     startY += 4 * mGridWidth;
                     break;
                 case parseInt(2500 * 6 / 3):
                     return;
                 default:
-                    var py1 = pList[index-1];
-                    var py2 = pList[index];
-                    ctx.moveTo(2 * mGridWidth + (index - 1) * 3 * MULTIPLE - startX, 4 * mGridWidth / 2 - py1 * state * mSGridWidth / 1000 + startY);
-                    ctx.lineTo(2 * mGridWidth + index * 3 * MULTIPLE - startX, 4 * mGridWidth / 2 - py2 * state * mSGridWidth / 1000 + startY);
+                    var py1 = leadData[index-1];
+                    var py2 = leadData[index];
+                    ctx.moveTo(2 * mGridWidth + (index - 1) * 3 * resolutionScale - startX, 4 * mGridWidth / 2 - py1 * gain * mSGridWidth / 1000 + startY);
+                    ctx.lineTo(2 * mGridWidth + index * 3 * resolutionScale - startX, 4 * mGridWidth / 2 - py2 * gain * mSGridWidth / 1000 + startY);
                     ctx.stroke();
                     break;
             }
@@ -5543,22 +5545,15 @@ app.get('/', (req, res) => {
         }
     }
 
-    // Draw cat with lime helmet
-    // loadImage('examples/images/1.jpg').then((image) => {
-    //     ctx.drawImage(image, 50, 0, 70, 70)
-
-    //     // console.log('<img src="' + canvas.toDataURL() + '" />')
-    //     res.send('<img src="' + canvas.toDataURL() + '" />');
-    // })
-
-    setDatas(pListTest, "Tyo", "Male", "24", "80", "120/80");
-    // setDatas(pList, "Tyo", "Male", "24", "80", "120/80");
+    // example data:
+    // setDatas(leadDataTest, "Tyo", "Male", "24", "80", "120/80");
+    
     initBackground();
 
-    // buffer
-    // var im = canvas.toBuffer();
+    var buffer = canvas.toBuffer();
+    var base64 = canvas.toDataURL();
 
-    res.send('<img src="' + canvas.toDataURL() + '" />');
+    res.send(`<img src="${base64}" />`);
 
 });
  
