@@ -5398,6 +5398,7 @@ app.get('/', (req, res) => {
 
     // resolution
     var mWidth = resolutionScale * 2700; // width
+    // var mWidth = resolutionScale * leadData.length * 3.05; // width
     var temp = 0;
     if (leadData.length * 3 % DEFAULT_TIMEOUT_MS == 0) {
         temp = leadData.length * 3 / DEFAULT_TIMEOUT_MS;
@@ -5406,6 +5407,7 @@ app.get('/', (req, res) => {
     }
     temp = parseInt((temp + 1) * 200 * resolutionScale / 1.12)
     var mHeight = temp; // height
+    // var mHeight = temp / 2.5; // height
 
     // canvas
     const canvas = createCanvas(mWidth, mHeight)
@@ -5541,6 +5543,13 @@ app.get('/', (req, res) => {
                     ctx.stroke();
                     break;
             }
+            // if (index > 0) {
+            //     var py1 = leadData[index-1];
+            //     var py2 = leadData[index];
+            //     ctx.moveTo((index - 1) * 3 * resolutionScale, mHeight / 2 / mGridWidth * mGridWidth - py1 * gain * mSGridWidth / 1000);
+            //     ctx.lineTo(index * 3 * resolutionScale, mHeight / 2 / mGridWidth * mGridWidth - py2 * gain * mSGridWidth / 1000);
+            //     ctx.stroke();
+            // }
             ctx.closePath();
         }
     }
