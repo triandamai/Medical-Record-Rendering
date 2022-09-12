@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  emr_rendering:
+    container_name: emr-render
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+     - 8001:8000
+    networks:
+      - app
+
+networks:
+  app:
+    external: true
