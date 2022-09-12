@@ -1,3 +1,4 @@
+# https://stackoverflow.com/questions/72225807/node-canvas-not-installing-on-docker
 FROM node:16.15.0
 WORKDIR /app
 COPY package*.json ./
