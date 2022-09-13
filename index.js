@@ -257,6 +257,7 @@ function renderECG(res,lead){
 
       initBackground();
 
+    //https://stackoverflow.com/questions/47918376/nodejs-serve-base64-as-image
     var buffer = canvas.toBuffer();
     // var base64 = canvas.toDataURL();
 
