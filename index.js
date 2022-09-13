@@ -34,7 +34,7 @@ app.get('/render/electrocardiogram',  (req, res) => {
                     /**
                      * lead:[[0,1]]
                      * */ 
-                    console.log(ress.data.data)
+                    //console.log(ress.data.data)
                     renderECG(res,ress.data.data.leadData[0])
                 }else{
                     res.send(ress.data.code)
