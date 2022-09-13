@@ -254,9 +254,15 @@ function renderECG(res,lead){
       initBackground();
 
     var buffer = canvas.toBuffer();
-    var base64 = canvas.toDataURL();
+    // var base64 = canvas.toDataURL();
 
-    res.send(`<img src="${base64}" />`);
+    // var img = new Buffer.from(base64.split(',')[1], 'base64');
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': buffer.length 
+    });
+
+   res.end(buffer); 
 
 
 }
