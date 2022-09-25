@@ -11,14 +11,12 @@ const app = express();
 
 // basic route
 app.get('/',(_,res)=>{
-    res.writeHead(200,"Medical record renderer")
-    res.send('medical record renderer')
+    res.status(200).send('medical record renderer')
 })
 app.get('/render/electrocardiogram',  (req, res) => {
     
         if(req.query.id == "" || req.query.id == undefined || req.query.id == null){
-            res.writeHead(400,"Cannot find electrocardiogram!")
-            res.send("Cannot find electrocardiogram!")
+            res.status(400).send("Cannot find electrocardiogram!")
             return
         }
         
@@ -39,13 +37,11 @@ app.get('/render/electrocardiogram',  (req, res) => {
                     //console.log(ress.data.data)
                     renderECG(res,ress.data.data.leadData[0])
                 }else{
-                    res.writeHead(400,`${ress.data.message}`)
-                    res.send(ress.data.code)
+                    res.status(400).send(ress.data.code)
                 }
             })
             .catch(e=>{
-                res.writeHead(400,`${e.message}`)
-                res.send(`${e.message}`)
+                res.status(400).send(`${e.message}`)
             })
 
 });
